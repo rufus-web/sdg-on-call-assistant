@@ -148,11 +148,52 @@
             font-weight: bold;
         }
 
-        .loading {
-            text-align: center;
-            color: white;
-            font-size: 1.2em;
-            padding: 20px;
+        .visit-info {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .visit-info h3 {
+            color: #232f3e;
+            margin-bottom: 15px;
+        }
+
+        .visit-count {
+            font-size: 2em;
+            color: #764ba2;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .daily-visits {
+            margin-top: 20px;
+        }
+
+        .daily-visits h4 {
+            color: #232f3e;
+            margin-bottom: 10px;
+        }
+
+        .daily-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .daily-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .daily-date {
+            color: #666;
+        }
+
+        .daily-count {
+            color: #667eea;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -182,7 +223,7 @@
                 <div class="program-description">
                     Complete information on FBA, covering everything available on the seller central help pages.
                 </div>
-                <button class="access-button" onclick="trackClick('fba', 'https://us-east-1.quicksight.aws.amazon.com/sn/account/amazonbi/spaces/324d67c6-cd71-43df-9b11-025fcff915ba')">
+                <button class="access-button" onclick="trackClick('fba', 'https://us-east-1.quicksight.aws.amazon.com/sn/account/amazonbi/spaces/324d67c6-cd71-43df[MAC_ADDRESS]')">
                     Access Now →
                 </button>
                 <div class="click-count" id="count-fba">Clicks: <span>0</span></div>
@@ -265,10 +306,21 @@
             <h2>📈 Total Engagement</h2>
             <div class="total-clicks" id="total-clicks">0</div>
             <p style="color: #666; margin-top: 10px;">Total clicks across all programs</p>
+            
+            <div class="visit-info" id="visit-info">
+                <h3>👥 Site Visitors</h3>
+                <div class="visit-count" id="total-visits">0</div>
+                <p style="color: #666;">Total site visits</p>
+                <div class="daily-visits" id="daily-visits-container" style="display: none;">
+                    <h4>Recent Daily Visits</h4>
+                    <div class="daily-list" id="daily-visits-list"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
+        // Load click counts
         async function loadCounts() {
             try {
                 const response = await fetch('/counts');
@@ -292,6 +344,7 @@
             }
         }
 
+        // Track click and redirect
         async function trackClick(linkName, url) {
             try {
                 await fetch(`/increment/${linkName}`);
@@ -303,10 +356,49 @@
             }
         }
 
+        // Track page visit
+        async function trackPageVisit() {
+            try {
+                await fetch('/track-visit');
+                await loadVisitStats();
+            } catch (error) {
+                console.error('Failed to track visit:', error);
+            }
+        }
+
+        // Load and display visit statistics
+        async function loadVisitStats() {
+            try {
+                const response = await fetch('/visit-stats');
+                const stats = await response.json();
+
+                document.getElementById('total-visits').textContent = stats.total_visits;
+
+                if (stats.daily_visits && stats.daily_visits.length > 0) {
+                    const container = document.getElementById('daily-visits-container');
+                    const list = document.getElementById('daily-visits-list');
+                    
+                    container.style.display = 'block';
+                    list.innerHTML = stats.daily_visits.slice(0, 7).map(day => `
+                        <div class="daily-item">
+                            <span class="daily-date">${day.date}</span>
+                            <span class="daily-count">${day.visits} visits</span>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Failed to load visit stats:', error);
+            }
+        }
+
+        // Initialize on page load
         loadCounts();
+        trackPageVisit();
+        
+        // Refresh stats periodically
         setInterval(loadCounts, 30000);
+        setInterval(loadVisitStats, 60000);
     </script>
 </body>
 </html>
-
 
