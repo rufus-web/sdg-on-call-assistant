@@ -75,7 +75,11 @@ app.get('/increment/:linkName', async (req, res) => {
 // Track page visit
 app.get('/track-visit', async (req, res) => {
   try {
-    const today = new Date().toISOString().split('T'); // Format: YYYY-MM-DD
+    // Convert to IST (UTC+5:30)
+    const now = new Date();
+    const istOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in milliseconds
+    const istDate = new Date(now.getTime() + istOffset);
+    const today = istDate.toISOString().split('T'); // Now gives IST date
 
     // Increment total visits
     await clicksCollection.findOneAndUpdate(
@@ -140,5 +144,6 @@ connectDB().then(() => {
     console.log(`�� Server running on http://localhost:${PORT}`);
   });
 });
+
 
 
