@@ -75,18 +75,16 @@ app.get('/increment/:linkName', async (req, res) => {
 // Track page visit
 app.get('/track-visit', async (req, res) => {
   try {
-    // Convert to IST (UTC+5:30)
+    // Get current date in local timezone (IST, set via TZ environment variable)
+    const today = new Date().toLocaleDateString('en-CA'); // en-CA gives YYYY-MM-DD format
     const now = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in milliseconds
-    const istDate = new Date(now.getTime() + istOffset);
-    const today = istDate.toISOString().split('T'); // Now gives IST date
 
     // Increment total visits
     await clicksCollection.findOneAndUpdate(
       { _id: 'visit_stats' },
       {
         $inc: { total_visits: 1 },
-        $set: { last_visit: new Date() }
+        $set: { last_visit: now }
       },
       { upsert: true }
     );
@@ -115,7 +113,7 @@ app.get('/visit-stats', async (req, res) => {
     // Get last 30 days of daily visits
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const dateString = thirtyDaysAgo.toISOString().split('T');
+    const dateString = thirtyDaysAgo.toLocaleDateString('en-CA');
 
     const dailyStats = await clicksCollection
       .find({
@@ -141,9 +139,7 @@ app.get('/visit-stats', async (req, res) => {
 // Start server after DB connection
 connectDB().then(() => {
   app.listen(PORT, () => {
-    console.log(`�� Server running on http://localhost:${PORT}`);
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
   });
 });
-
-
 
