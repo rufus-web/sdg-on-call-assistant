@@ -1,0 +1,262 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDG On-Call Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Amazon Ember', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 30px 0;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .programs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .program-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .program-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .program-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .program-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .program-title {
+            font-size: 1.4em;
+            color: #232f3e;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .program-description {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .click-count {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .stats-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .stats-panel h2 {
+            color: #232f3e;
+            margin-bottom: 20px;
+        }
+
+        .total-clicks {
+            font-size: 3em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 SDG On-Call Assistant</h1>
+            <p class="subtitle">Access and manage all programs in one place</p>
+        </header>
+
+        <div class="programs-grid">
+            <div class="program-card" onclick="trackClick('paneu', 'https://us-east-1.quicksight.aws.amazon.com/sn/account/amazonbi/spaces/9289e4b4-8af7-42c7-be14-f923f8a09675')">
+                <div class="program-icon">🌍</div>
+                <div class="program-title">Pan-EU</div>
+                <div class="program-description">
+                    Comprehensive information on PanEU, covering program benefits, activation steps, and optimization strategies.
+                </div>
+                <div class="click-count" id="count-paneu">Clicks: <span>0</span></div>
+            </div>
+
+            <div class="program-card" onclick="trackClick('fba', 'https://us-east-1.quicksight.aws.amazon.com/sn/account/amazonbi/spaces/324d67c6-cd71-43df-9b11-025fcff915ba')">
+                <div class="program-icon">📦</div>
+                <div class="program-title">FBA</div>
+                <div class="program-description">
+                    Complete information on FBA, covering everything available on the seller central help pages.
+                </div>
+                <div class="click-count" id="count-fba">Clicks: <span>0</span></div>
+            </div>
+
+            <div class="program-card" onclick="trackClick('sfp', 'https://us-east-1.quicksight.aws.amazon.com/sn/account/amazonbi/spaces/51d7ccf0-7d1b-4ce3-a84b-1171d0b48356')">
+                <div class="program-icon">🚚</div>
+                <div class="program-title">Seller-Fulfilled Prime</div>
+                <div class="program-description">
+                    Comprehensive information on SFP program, including eligibility criteria, performance metrics, and best practices.
+                </div>
+                <div class="click-count" id="count-sfp">Clicks: <span>0</span></div>
+            </div>
+
+            <div class="program-card" onclick="trackClick('inventory', 'https://us-east-1.quicksight.aws.amazon.com/sn/account/amazonbi/spaces/b7509e44-57f0-4516-89b1-48d8d96402ee')">
+                <div class="program-icon">📊</div>
+                <div class="program-title">Inventory Health Management</div>
+                <div class="program-description">
+                    Expert guidance on inventory optimization, IPI scores, and inventory-related program management processes.
+                </div>
+                <div class="click-count" id="count-inventory">Clicks: <span>0</span></div>
+            </div>
+
+            <div class="program-card" onclick="trackClick('transparency', 'https://us-east-1.quicksight.aws.amazon.com/sn/account/amazonbi/spaces/b5aa4037-53e4-41d7-8f98-f2600cf52e2b')">
+                <div class="program-icon">🔒</div>
+                <div class="program-title">Transparency</div>
+                <div class="program-description">
+                    Detailed information about Amazon's Transparency program for counterfeit prevention and product authenticity.
+                </div>
+                <div class="click-count" id="count-transparency">Clicks: <span>0</span></div>
+            </div>
+
+            <div class="program-card" onclick="trackClick('brand', 'https://us-east-1.quicksight.aws.amazon.com/sn/account/amazonbi/spaces/5c8c8f9a-153d-4dc4-ae52-3c49d22f7f50')">
+                <div class="program-icon">🏷️</div>
+                <div class="program-title">Brand Owners</div>
+                <div class="program-description">
+                    Expert guidance on Brand Registry, advertising strategies, and exclusive brand tools for improved performance.
+                </div>
+                <div class="click-count" id="count-brand">Clicks: <span>0</span></div>
+            </div>
+
+            <div class="program-card" onclick="trackClick('listings', 'https://us-east-1.quicksight.aws.amazon.com/sn/account/amazonbi/spaces/6de01a59-bf09-4ef6-8926-994c098071d4')">
+                <div class="program-icon">🧾</div>
+                <div class="program-title">Listings</div>
+                <div class="program-description">
+                    Complete support for Amazon listing operations including ASIN creation, updates, and catalog management.
+                </div>
+                <div class="click-count" id="count-listings">Clicks: <span>0</span></div>
+            </div>
+
+            <div class="program-card" onclick="trackClick('sponsored', 'https://us-east-1.quicksight.aws.amazon.com/sn/account/amazonbi/spaces/49e4c006-24f6-4d46-aa4c-3cacc3df3748')">
+                <div class="program-icon">💰</div>
+                <div class="program-title">Sponsored Products</div>
+                <div class="program-description">
+                    Comprehensive information about Sponsored Products, advertising strategies, and campaign optimization.
+                </div>
+                <div class="click-count" id="count-sponsored">Clicks: <span>0</span></div>
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <h2>📈 Total Engagement</h2>
+            <div class="total-clicks" id="total-clicks">0</div>
+            <p style="color: #666; margin-top: 10px;">Total clicks across all programs</p>
+        </div>
+    </div>
+
+    <script>
+        async function loadCounts() {
+            try {
+                const response = await fetch('/counts');
+                const counts = await response.json();
+                
+                document.querySelector('#count-paneu span').textContent = counts.paneu || 0;
+                document.querySelector('#count-fba span').textContent = counts.fba || 0;
+                document.querySelector('#count-sfp span').textContent = counts.sfp || 0;
+                document.querySelector('#count-inventory span').textContent = counts.inventory || 0;
+                document.querySelector('#count-transparency span').textContent = counts.transparency || 0;
+                document.querySelector('#count-brand span').textContent = counts.brand || 0;
+                document.querySelector('#count-listings span').textContent = counts.listings || 0;
+                document.querySelector('#count-sponsored span').textContent = counts.sponsored || 0;
+                
+                const total = (counts.paneu || 0) + (counts.fba || 0) + (counts.sfp || 0) + 
+                             (counts.inventory || 0) + (counts.transparency || 0) + 
+                             (counts.brand || 0) + (counts.listings || 0) + (counts.sponsored || 0);
+                document.getElementById('total-clicks').textContent = total;
+            } catch (error) {
+                console.error('Failed to load counts:', error);
+            }
+        }
+
+        async function trackClick(linkName, url) {
+            try {
+                await fetch(`/increment/${linkName}`);
+                loadCounts();
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('Failed to track click:', error);
+                window.open(url, '_blank');
+            }
+        }
+
+        loadCounts();
+        setInterval(loadCounts, 30000);
+    </script>
+</body>
+</html>
+
