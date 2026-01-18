@@ -49,6 +49,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index_1.html'));
 });
 
+// Serve the admin dashboard
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
 // Get all click counts
 app.get('/counts', async (req, res) => {
   try {
@@ -59,15 +64,32 @@ app.get('/counts', async (req, res) => {
   }
 });
 
-// Increment a specific link's click count
+// Increment a specific link's click count (now with daily tracking)
 app.get('/increment/:linkName', async (req, res) => {
   try {
     const linkName = req.params.linkName;
+    const today = new Date().toLocaleDateString('en-CA');
+    
+    // Increment total count
     const result = await clicksCollection.findOneAndUpdate(
       { _id: 'click_counts' },
       { $inc: { [linkName]: 1 } },
       { returnDocument: 'after' }
     );
+    
+    // Increment daily program-specific count
+    await clicksCollection.findOneAndUpdate(
+      { _id: `program_${linkName}_${today}` },
+      {
+        $inc: { clicks: 1 },
+        $set: { 
+          program: linkName,
+          date: today 
+        }
+      },
+      { upsert: true }
+    );
+    
     res.json({ success: true, counts: result });
   } catch (error) {
     res.status(500).json({ error: 'Failed to increment count' });
@@ -77,8 +99,7 @@ app.get('/increment/:linkName', async (req, res) => {
 // Track page visit
 app.get('/track-visit', async (req, res) => {
   try {
-    // Get current date in local timezone (IST, set via TZ environment variable)
-    const today = new Date().toLocaleDateString('en-CA'); // en-CA gives YYYY-MM-DD format
+    const today = new Date().toLocaleDateString('en-CA');
     const now = new Date();
 
     // Increment total visits
@@ -135,6 +156,64 @@ app.get('/visit-stats', async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: 'Failed to get stats' });
+  }
+});
+
+// Get comprehensive admin statistics
+app.get('/admin-stats', async (req, res) => {
+  try {
+    // Get total clicks per program
+    const totalClicks = await clicksCollection.findOne({ _id: 'click_counts' });
+    
+    // Get total visits
+    const visitStats = await clicksCollection.findOne({ _id: 'visit_stats' });
+    
+    // Get all program daily stats
+    const programStats = await clicksCollection
+      .find({
+        _id: { $regex: /^program_/ }
+      })
+      .sort({ date: -1 })
+      .toArray();
+    
+    // Get daily visit stats
+    const dailyVisits = await clicksCollection
+      .find({
+        _id: { $regex: /^daily_/ }
+      })
+      .sort({ date: -1 })
+      .toArray();
+    
+    res.json({
+      total_clicks: totalClicks,
+      total_visits: visitStats?.total_visits || 0,
+      program_daily_stats: programStats,
+      daily_visits: dailyVisits
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get admin stats' });
+  }
+});
+
+// Get program-specific daily breakdown
+app.get('/program-daily-stats', async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    
+    let query = { _id: { $regex: /^program_/ } };
+    
+    if (startDate && endDate) {
+      query.date = { $gte: startDate, $lte: endDate };
+    }
+    
+    const stats = await clicksCollection
+      .find(query)
+      .sort({ date: -1 })
+      .toArray();
+    
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get program daily stats' });
   }
 });
 
