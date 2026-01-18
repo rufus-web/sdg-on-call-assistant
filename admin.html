@@ -1,3 +1,4 @@
+```html
 
 <!DOCTYPE html>
 <html lang="en">
@@ -191,6 +192,17 @@
             padding: 40px;
         }
 
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
         .program-badge {
             display: inline-block;
             padding: 4px 12px;
@@ -210,6 +222,20 @@
         .badge-sponsored { background: #30cfd0; }
         .badge-deals { background: #a8edea; color: #232f3e; }
         .badge-helpdesk { background: #ff6b6b; }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box p {
+            color: #1565c0;
+            margin: 0;
+            font-size: 0.95em;
+        }
     </style>
 </head>
 <body>
@@ -224,6 +250,11 @@
         <div id="loading" class="loading">Loading analytics data...</div>
 
         <div id="dashboard" style="display: none;">
+            <!-- Info Box -->
+            <div class="info-box" id="info-box" style="display: none;">
+                <p>ℹ️ <strong>Note:</strong> Daily program tracking started today. Historical data will accumulate as users access programs.</p>
+            </div>
+
             <!-- Summary Cards -->
             <div class="summary-cards">
                 <div class="card">
@@ -250,37 +281,30 @@
 
             <!-- Chart -->
             <div class="chart-container">
-                <h2>📈 Program Clicks Over Time (Last 30 Days)</h2>
+                <h2>📈 Total Program Clicks (All-Time)</h2>
                 <canvas id="programChart"></canvas>
             </div>
 
-            <!-- Filters -->
-            <div class="filters">
-                <label>Filter by Date:</label>
-                <input type="date" id="start-date">
-                <label>to</label>
-                <input type="date" id="end-date">
-                <button class="export-button" onclick="applyFilters()">Apply Filter</button>
-                <button class="export-button" onclick="clearFilters()">Clear</button>
-            </div>
+            <!-- Daily Tracking Section -->
+            <div id="daily-section">
+                <!-- Filters -->
+                <div class="filters">
+                    <label>Filter by Date:</label>
+                    <input type="date" id="start-date">
+                    <label>to</label>
+                    <input type="date" id="end-date">
+                    <button class="export-button" onclick="applyFilters()">Apply Filter</button>
+                    <button class="export-button" onclick="clearFilters()">Clear</button>
+                </div>
 
-            <!-- Export Button -->
-            <button class="export-button" onclick="exportToCSV()">📥 Export to CSV</button>
+                <!-- Export Button -->
+                <button class="export-button" onclick="exportToCSV()">📥 Export to CSV</button>
 
-            <!-- Table -->
-            <div class="table-container">
-                <h2>📋 Daily Program Breakdown</h2>
-                <table id="stats-table">
-                    <thead>
-                        <tr>
-                            <th onclick="sortTable(0)">Date ▼</th>
-                            <th onclick="sortTable(1)">Program ▼</th>
-                            <th onclick="sortTable(2)">Clicks ▼</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body">
-                    </tbody>
-                </table>
+                <!-- Table -->
+                <div class="table-container">
+                    <h2>📋 Daily Program Breakdown</h2>
+                    <div id="table-content"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -321,34 +345,40 @@
                 const response = await fetch('/admin-stats');
                 const data = await response.json();
                 
-                allData = data.program_daily_stats;
+                allData = data.program_daily_stats || [];
                 filteredData = allData;
                 
                 updateSummaryCards(data);
                 renderChart(data);
-                renderTable(filteredData);
+                
+                if (allData.length === 0) {
+                    document.getElementById('info-box').style.display = 'block';
+                    renderEmptyState();
+                } else {
+                    renderTable(filteredData);
+                }
                 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
             } catch (error) {
                 console.error('Failed to load dashboard:', error);
-                document.getElementById('loading').textContent = 'Failed to load analytics data';
+                document.getElementById('loading').textContent = 'Failed to load analytics data. Error: ' + error.message;
             }
         }
 
         function updateSummaryCards(data) {
             // Total clicks
-            const totalClicks = Object.values(data.total_clicks || {})
+            const clicks = data.total_clicks || {};
+            delete clicks._id;
+            const totalClicks = Object.values(clicks)
                 .filter(v => typeof v === 'number')
                 .reduce((a, b) => a + b, 0);
             document.getElementById('total-clicks').textContent = totalClicks;
             
             // Total visits
-            document.getElementById('total-visits').textContent = data.total_visits;
+            document.getElementById('total-visits').textContent = data.total_visits || 0;
             
             // Top program
-            const clicks = data.total_clicks || {};
-            delete clicks._id;
             const topProgram = Object.entries(clicks)
                 .sort((a, b) => b[1] - a[1])[0];
             if (topProgram) {
@@ -356,47 +386,43 @@
             }
             
             // Days active
-            const dates = [...new Set(data.program_daily_stats.map(s => s.date))];
-            document.getElementById('days-active').textContent = dates.length;
+            const dates = data.daily_visits ? data.daily_visits
+                .filter(v => v.date && typeof v.date === 'string')
+                .map(v => v.date) : [];
+            const uniqueDates = [...new Set(dates)];
+            document.getElementById('days-active').textContent = uniqueDates.length;
         }
 
         function renderChart(data) {
             const ctx = document.getElementById('programChart').getContext('2d');
             
-            // Prepare data for chart
-            const dates = [...new Set(data.program_daily_stats.map(s => s.date))].sort();
-            const programs = Object.keys(programNames);
+            const clicks = data.total_clicks || {};
+            delete clicks._id;
             
-            const datasets = programs.map(program => {
-                const programData = dates.map(date => {
-                    const stat = data.program_daily_stats.find(s => s.date === date && s.program === program);
-                    return stat ? stat.clicks : 0;
-                });
-                
-                return {
-                    label: programNames[program],
-                    data: programData,
-                    borderColor: programColors[program],
-                    backgroundColor: programColors[program] + '20',
-                    tension: 0.4
-                };
-            });
+            const programs = Object.keys(clicks);
+            const values = Object.values(clicks);
             
             if (chart) {
                 chart.destroy();
             }
             
             chart = new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
-                    labels: dates,
-                    datasets: datasets
+                    labels: programs.map(p => programNames[p] || p),
+                    datasets: [{
+                        label: 'Total Clicks',
+                        data: values,
+                        backgroundColor: programs.map(p => programColors[p] || '#667eea'),
+                        borderColor: programs.map(p => programColors[p] || '#667eea'),
+                        borderWidth: 1
+                    }]
                 },
                 options: {
                     responsive: true,
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            display: false
                         }
                     },
                     scales: {
@@ -411,10 +437,39 @@
             });
         }
 
+        function renderEmptyState() {
+            document.getElementById('table-content').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <h3>No Daily Program Data Yet</h3>
+                    <p>Daily program tracking has just been enabled. Data will appear here as users click on programs.</p>
+                    <p style="margin-top: 10px; color: #999;">Check back soon to see detailed analytics!</p>
+                </div>
+            `;
+        }
+
         function renderTable(data) {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
+            if (data.length === 0) {
+                renderEmptyState();
+                return;
+            }
+
+            const tableHTML = `
+                <table id="stats-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">Date ▼</th>
+                            <th onclick="sortTable(1)">Program ▼</th>
+                            <th onclick="sortTable(2)">Clicks ▼</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            `;
             
+            document.getElementById('table-content').innerHTML = tableHTML;
+            
+            const tbody = document.getElementById('table-body');
             data.forEach(stat => {
                 const row = tbody.insertRow();
                 row.innerHTML = `
@@ -461,6 +516,11 @@
         }
 
         function exportToCSV() {
+            if (filteredData.length === 0) {
+                alert('No data to export yet. Daily tracking will start recording data as users click on programs.');
+                return;
+            }
+
             const headers = ['Date', 'Program', 'Clicks'];
             const rows = filteredData.map(stat => [
                 stat.date,
@@ -492,3 +552,4 @@
 </body>
 </html>
 
+```
