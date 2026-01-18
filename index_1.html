@@ -1,3 +1,4 @@
+```html
 
 <!DOCTYPE html>
 <html lang="en">
@@ -140,6 +141,46 @@
         .stats-panel h2 {
             color: #232f3e;
             margin-bottom: 20px;
+        }
+
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .collapsible-header:hover {
+            background: #e9ecef;
+        }
+
+        .collapsible-header h2 {
+            margin: 0;
+            margin-right: 10px;
+        }
+
+        .collapse-icon {
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+        }
+
+        .collapse-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .collapsible-content.expanded {
+            max-height: 1000px;
         }
 
         .total-clicks {
@@ -327,17 +368,29 @@
         </div>
 
         <div class="stats-panel">
-            <h2>📈 Total Engagement</h2>
-            <div class="total-clicks" id="total-clicks">0</div>
-            <p style="color: #666; margin-top: 10px;">Total clicks across all programs</p>
+            <!-- Collapsible Total Engagement Section -->
+            <div class="collapsible-header" onclick="toggleSection('engagement')">
+                <h2>📈 Total Engagement</h2>
+                <span class="collapse-icon" id="engagement-icon">▼</span>
+            </div>
+            <div class="collapsible-content" id="engagement-content">
+                <div class="total-clicks" id="total-clicks">0</div>
+                <p style="color: #666; margin-top: 10px;">Total clicks across all programs</p>
+            </div>
             
-            <div class="visit-info" id="visit-info">
-                <h3>👥 Site Visitors</h3>
-                <div class="visit-count" id="total-visits">0</div>
-                <p style="color: #666;">Total site visits</p>
-                <div class="daily-visits" id="daily-visits-container" style="display: none;">
-                    <h4>Recent Daily Visits</h4>
-                    <div class="daily-list" id="daily-visits-list"></div>
+            <!-- Collapsible Site Visitors Section -->
+            <div class="visit-info">
+                <div class="collapsible-header" onclick="toggleSection('visitors')">
+                    <h3 style="margin: 0; margin-right: 10px;">👥 Site Visitors</h3>
+                    <span class="collapse-icon" id="visitors-icon">▼</span>
+                </div>
+                <div class="collapsible-content" id="visitors-content">
+                    <div class="visit-count" id="total-visits">0</div>
+                    <p style="color: #666;">Total site visits</p>
+                    <div class="daily-visits" id="daily-visits-container" style="display: none;">
+                        <h4>Recent Daily Visits</h4>
+                        <div class="daily-list" id="daily-visits-list"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -352,13 +405,22 @@
                 <strong>Program information and links are continuously updated.</strong>
             </p>
             <p style="color: #667eea; font-weight: bold;">
-                📧 Report issues, incorrect links, or suggest missing programs: <span style="background: #e8eaf6; padding: 4px 8px; border-radius: 4px;"> Rufus Prince @rufuspri</span>
+                📧 Report issues, incorrect links, suggest missing programs, or share feedback on accuracy, completeness, and relevance: <span style="background: #e8eaf6; padding: 4px 8px; border-radius: 4px;">@rufuspri</span>
             </p>
         </div>
 
     </div>
 
     <script>
+        // Toggle collapsible sections
+        function toggleSection(sectionId) {
+            const content = document.getElementById(sectionId + '-content');
+            const icon = document.getElementById(sectionId + '-icon');
+            
+            content.classList.toggle('expanded');
+            icon.classList.toggle('expanded');
+        }
+
         // Load click counts
         async function loadCounts() {
             try {
@@ -444,3 +506,4 @@
 </body>
 </html>
 
+```
