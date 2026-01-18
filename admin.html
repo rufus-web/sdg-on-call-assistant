@@ -1,4 +1,3 @@
-```html
 
 <!DOCTYPE html>
 <html lang="en">
@@ -528,18 +527,19 @@
                 stat.clicks
             ]);
             
-            let csv = headers.join(',') + '
-';
+            const csvRows = [headers.join(',')];
             rows.forEach(row => {
-                csv += row.join(',') + '
-';
+                csvRows.push(row.join(','));
             });
+            
+            const csv = csvRows.join('
+');
             
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `sdg-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = 'sdg-analytics-' + new Date().toISOString().split('T')[0] + '.csv';
             a.click();
         }
 
@@ -552,4 +552,3 @@
 </body>
 </html>
 
-```
