@@ -1,4 +1,4 @@
-
+```html
 
 <!DOCTYPE html>
 <html lang="en">
@@ -129,6 +129,35 @@
             font-size: 0.85em;
             color: #666;
             text-align: center;
+        }
+
+        .info-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .caution-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .caution-box p {
+            color: #856404;
+            margin: 0;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .caution-box strong {
+            color: #664d03;
         }
 
         .stats-panel {
@@ -368,6 +397,29 @@
             </div>
         </div>
 
+        <!-- About This Portal Section (moved before stats) -->
+        <div class="info-panel">
+            <h3 style="color: #232f3e; margin-bottom: 15px; font-size: 1.2em;">📝 About This Portal</h3>
+            <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
+                This SDG On-Call Assistant is designed to help Account Managers access program information in-depth during seller calls, significantly reducing get-back time when sellers inquire about multiple programs.
+            </p>
+            <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
+                <strong>Program information and links are continuously updated.</strong>
+            </p>
+            
+            <!-- Caution Box -->
+            <div class="caution-box">
+                <p>
+                    <strong>⚠️ Important:</strong> Some information in these programs is AM-facing only. Please be mindful of which information to share with sellers.
+                </p>
+            </div>
+            
+            <p style="color: #667eea; font-weight: bold; margin-top: 20px;">
+                📧 Report issues, incorrect links, missing programs, and feedback on accuracy and completeness: Rufus Prince @rufuspri
+            </p>
+        </div>
+
+        <!-- Stats Panel -->
         <div class="stats-panel">
             <!-- Collapsible Total Engagement Section -->
             <div class="collapsible-header" onclick="toggleSection('engagement')">
@@ -394,20 +446,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Disclaimer Footer -->
-        <div style="background: #f8f9fa; border-radius: 12px; padding: 25px; margin-top: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;">
-            <h3 style="color: #232f3e; margin-bottom: 15px; font-size: 1.2em;">📝 About This Portal</h3>
-            <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
-                This SDG On-Call Assistant is designed to help Account Managers access program information in-depth during seller calls, significantly reducing get-back time when sellers inquire about multiple programs.
-            </p>
-            <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
-                <strong>Program information and links are continuously updated.</strong>
-            </p>
-            <p style="color: #667eea; font-weight: bold;">
-                📧 Report issues, incorrect links, missing programs, and feedback on accuracy and completeness: Rufus Prince @rufuspri
-            </p>
         </div>
 
     </div>
@@ -508,7 +546,3 @@
 </html>
 
 ```
-
-
-
-
