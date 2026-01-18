@@ -33,7 +33,9 @@ async function connectDB() {
         transparency: 0,
         brand: 0,
         listings: 0,
-        sponsored: 0
+        sponsored: 0,
+        deals: 0,
+        helpdesk: 0
       });
       console.log('✅ Initialized click counts');
     }
