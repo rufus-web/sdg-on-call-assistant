@@ -1,4 +1,3 @@
-```html
 
 <!DOCTYPE html>
 <html lang="en">
@@ -221,7 +220,7 @@
         .badge-listings { background: #fee140; color: #232f3e; }
         .badge-sponsored { background: #30cfd0; }
         .badge-deals { background: #a8edea; color: #232f3e; }
-        .badge-helpdesk { background: #ff6b6b; }
+        .badge-helpdesk { background: #[MAC_ADDRESS]; }
 
         .info-box {
             background: #e3f2fd;
@@ -250,12 +249,10 @@
         <div id="loading" class="loading">Loading analytics data...</div>
 
         <div id="dashboard" style="display: none;">
-            <!-- Info Box -->
             <div class="info-box" id="info-box" style="display: none;">
                 <p>ℹ️ <strong>Note:</strong> Daily program tracking started today. Historical data will accumulate as users access programs.</p>
             </div>
 
-            <!-- Summary Cards -->
             <div class="summary-cards">
                 <div class="card">
                     <div class="card-icon">🎯</div>
@@ -279,15 +276,12 @@
                 </div>
             </div>
 
-            <!-- Chart -->
             <div class="chart-container">
                 <h2>📈 Total Program Clicks (All-Time)</h2>
                 <canvas id="programChart"></canvas>
             </div>
 
-            <!-- Daily Tracking Section -->
             <div id="daily-section">
-                <!-- Filters -->
                 <div class="filters">
                     <label>Filter by Date:</label>
                     <input type="date" id="start-date">
@@ -297,10 +291,8 @@
                     <button class="export-button" onclick="clearFilters()">Clear</button>
                 </div>
 
-                <!-- Export Button -->
                 <button class="export-button" onclick="exportToCSV()">📥 Export to CSV</button>
 
-                <!-- Table -->
                 <div class="table-container">
                     <h2>📋 Daily Program Breakdown</h2>
                     <div id="table-content"></div>
@@ -337,7 +329,7 @@
             listings: '#fee140',
             sponsored: '#30cfd0',
             deals: '#a8edea',
-            helpdesk: '#ff6b6b'
+            helpdesk: '#[MAC_ADDRESS]'
         };
 
         async function loadDashboard() {
@@ -367,7 +359,6 @@
         }
 
         function updateSummaryCards(data) {
-            // Total clicks
             const clicks = data.total_clicks || {};
             delete clicks._id;
             const totalClicks = Object.values(clicks)
@@ -375,17 +366,14 @@
                 .reduce((a, b) => a + b, 0);
             document.getElementById('total-clicks').textContent = totalClicks;
             
-            // Total visits
             document.getElementById('total-visits').textContent = data.total_visits || 0;
             
-            // Top program
             const topProgram = Object.entries(clicks)
                 .sort((a, b) => b[1] - a[1])[0];
             if (topProgram) {
                 document.getElementById('top-program').textContent = programNames[topProgram[0]] || topProgram[0];
             }
             
-            // Days active
             const dates = data.daily_visits ? data.daily_visits
                 .filter(v => v.date && typeof v.date === 'string')
                 .map(v => v.date) : [];
@@ -438,14 +426,7 @@
         }
 
         function renderEmptyState() {
-            document.getElementById('table-content').innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">📊</div>
-                    <h3>No Daily Program Data Yet</h3>
-                    <p>Daily program tracking has just been enabled. Data will appear here as users click on programs.</p>
-                    <p style="margin-top: 10px; color: #999;">Check back soon to see detailed analytics!</p>
-                </div>
-            `;
+            document.getElementById('table-content').innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><h3>No Daily Program Data Yet</h3><p>Daily program tracking has just been enabled. Data will appear here as users click on programs.</p><p style="margin-top: 10px; color: #999;">Check back soon to see detailed analytics!</p></div>';
         }
 
         function renderTable(data) {
@@ -454,29 +435,14 @@
                 return;
             }
 
-            const tableHTML = `
-                <table id="stats-table">
-                    <thead>
-                        <tr>
-                            <th onclick="sortTable(0)">Date ▼</th>
-                            <th onclick="sortTable(1)">Program ▼</th>
-                            <th onclick="sortTable(2)">Clicks ▼</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body"></tbody>
-                </table>
-            `;
+            const tableHTML = '<table id="stats-table"><thead><tr><th onclick="sortTable(0)">Date ▼</th><th onclick="sortTable(1)">Program ▼</th><th onclick="sortTable(2)">Clicks ▼</th></tr></thead><tbody id="table-body"></tbody></table>';
             
             document.getElementById('table-content').innerHTML = tableHTML;
             
             const tbody = document.getElementById('table-body');
             data.forEach(stat => {
                 const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>${stat.date}</td>
-                    <td><span class="program-badge badge-${stat.program}">${programNames[stat.program] || stat.program}</span></td>
-                    <td>${stat.clicks}</td>
-                `;
+                row.innerHTML = '<td>' + stat.date + '</td><td><span class="program-badge badge-' + stat.program + '">' + (programNames[stat.program] || stat.program) + '</span></td><td>' + stat.clicks + '</td>';
             });
         }
 
@@ -522,35 +488,33 @@
             }
 
             const headers = ['Date', 'Program', 'Clicks'];
-            const rows = filteredData.map(stat => [
-                stat.date,
-                programNames[stat.program] || stat.program,
-                stat.clicks
-            ]);
+            const csvLines = [];
+            csvLines.push(headers.join(','));
             
-            const csvRows = [headers.join(',')];
-            rows.forEach(row => {
-                csvRows.push(row.join(','));
+            filteredData.forEach(stat => {
+                const row = [
+                    stat.date,
+                    programNames[stat.program] || stat.program,
+                    stat.clicks
+                ];
+                csvLines.push(row.join(','));
             });
             
-            const csv = csvRows.join('
-');
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'sdg-analytics-' + new Date().toISOString().split('T')[0] + '.csv';
-            a.click();
+            const csvContent = csvLines.join(String.fromCharCode(10));
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'sdg-analytics-' + new Date().toISOString().split('T')[0] + '.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
-        // Load dashboard on page load
         loadDashboard();
-        
-        // Auto-refresh every 30 seconds
         setInterval(loadDashboard, 30000);
     </script>
 </body>
 </html>
 
-```
