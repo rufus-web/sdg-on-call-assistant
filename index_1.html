@@ -300,6 +300,30 @@
                 </button>
                 <div class="click-count" id="count-sponsored">Clicks: <span>0</span></div>
             </div>
+
+            <div class="program-card">
+                <div class="program-icon">🎁</div>
+                <div class="program-title">Deals Program</div>
+                <div class="program-description">
+                    Complete information about Amazon Deals program, including deal creation, optimization strategies, and performance tracking.
+                </div>
+                <button class="access-button" onclick="trackClick('deals', 'https://us-east-1.quicksight.aws.amazon.com/sn/account/amazonbi/spaces/65c38c94-1f0e-4a50-928e-3ec983af9207')">
+                    Access Now →
+                </button>
+                <div class="click-count" id="count-deals">Clicks: <span>0</span></div>
+            </div>
+
+            <div class="program-card">
+                <div class="program-icon">🎫</div>
+                <div class="program-title">SIM-Bank & Help Desk</div>
+                <div class="program-description">
+                    Access all ticket links for program-related issues. Provides guidance on listing-level and account-level enforcement, and assists with the correct appeal procedure for selling partner issues.
+                </div>
+                <button class="access-button" onclick="trackClick('helpdesk', 'https://us-east-1.quicksight.aws.amazon.com/sn/account/amazonbi/spaces/a0e91f9a-ce0d-43cc-a400-75a4c2eb641e')">
+                    Access Now →
+                </button>
+                <div class="click-count" id="count-helpdesk">Clicks: <span>0</span></div>
+            </div>
         </div>
 
         <div class="stats-panel">
@@ -317,6 +341,21 @@
                 </div>
             </div>
         </div>
+
+        <!-- Disclaimer Footer -->
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 25px; margin-top: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;">
+            <h3 style="color: #232f3e; margin-bottom: 15px; font-size: 1.2em;">📝 About This Portal</h3>
+            <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
+                This SDG On-Call Assistant is designed to help Account Managers access program information in-depth during seller calls, significantly reducing get-back time when sellers inquire about multiple programs.
+            </p>
+            <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
+                <strong>Program information and links are continuously updated.</strong>
+            </p>
+            <p style="color: #667eea; font-weight: bold;">
+                📧 Report issues, incorrect links, or suggest missing programs: <span style="background: #e8eaf6; padding: 4px 8px; border-radius: 4px;"> Rufus Prince @rufuspri</span>
+            </p>
+        </div>
+
     </div>
 
     <script>
@@ -334,10 +373,13 @@
                 document.querySelector('#count-brand span').textContent = counts.brand || 0;
                 document.querySelector('#count-listings span').textContent = counts.listings || 0;
                 document.querySelector('#count-sponsored span').textContent = counts.sponsored || 0;
+                document.querySelector('#count-deals span').textContent = counts.deals || 0;
+                document.querySelector('#count-helpdesk span').textContent = counts.helpdesk || 0;
                 
                 const total = (counts.paneu || 0) + (counts.fba || 0) + (counts.sfp || 0) + 
                              (counts.inventory || 0) + (counts.transparency || 0) + 
-                             (counts.brand || 0) + (counts.listings || 0) + (counts.sponsored || 0);
+                             (counts.brand || 0) + (counts.listings || 0) + (counts.sponsored || 0) +
+                             (counts.deals || 0) + (counts.helpdesk || 0);
                 document.getElementById('total-clicks').textContent = total;
             } catch (error) {
                 console.error('Failed to load counts:', error);
@@ -401,5 +443,4 @@
     </script>
 </body>
 </html>
-
 
